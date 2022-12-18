@@ -1,6 +1,7 @@
 
 package com.reactpiplibrary;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -9,6 +10,7 @@ import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
 
 import android.app.PictureInPictureParams;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.util.Rational;
 
@@ -17,16 +19,27 @@ import android.content.Context;
 import android.os.Process;
 
 import com.facebook.react.bridge.Promise;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 public class RNAndroidPipModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
     private final ReactApplicationContext reactContext;
     private static final int ASPECT_WIDTH = 3;
     private static final int ASPECT_HEIGHT = 4;
+    public static final String PIP_MODE_CHANGE = "PIP_MODE_CHANGE";
     private boolean isPipSupported = false;
     private boolean isCustomAspectRatioSupported = false;
     private boolean isPipListenerEnabled = false;
     private Rational aspectRatio;
+    private static DeviceEventManagerModule.RCTDeviceEventEmitter eventEmitter = null;
+
+    public static void pipModeChanged(Boolean isInPictureInPictureMode, Configuration newConfig) {
+        WritableMap args = Arguments.createMap();
+        args.putBoolean("isInPiPMode", isInPictureInPictureMode);
+        args.putInt("width", newConfig.screenWidthDp);
+        args.putInt("height", newConfig.screenHeightDp);
+        eventEmitter.emit(PIP_MODE_CHANGE, args);
+    }
 
     public RNAndroidPipModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -39,6 +52,12 @@ public class RNAndroidPipModule extends ReactContextBaseJavaModule implements Li
             isCustomAspectRatioSupported = true;
             aspectRatio = new Rational(ASPECT_WIDTH, ASPECT_HEIGHT);
         }
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        eventEmitter = getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
     }
 
     @Override
