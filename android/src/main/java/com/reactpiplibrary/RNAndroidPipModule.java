@@ -19,6 +19,7 @@ import android.content.Context;
 import android.os.Process;
 
 import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 public class RNAndroidPipModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
