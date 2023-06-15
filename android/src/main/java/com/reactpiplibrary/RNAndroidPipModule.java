@@ -32,9 +32,8 @@ import androidx.annotation.NonNull;
 
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleEventObserver;
 
-public class RNAndroidPipModule extends ReactContextBaseJavaModule implements LifecycleEventListener, LifecycleEventObserver {
+public class RNAndroidPipModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
     private final ReactApplicationContext reactContext;
     private static final int ASPECT_WIDTH = 3;
@@ -45,11 +44,10 @@ public class RNAndroidPipModule extends ReactContextBaseJavaModule implements Li
     private boolean isPipListenerEnabled = false;
     private Rational aspectRatio;
     private static DeviceEventManagerModule.RCTDeviceEventEmitter eventEmitter = null;
+    public static final String PIP_MODE_CHANGE = "PIP_MODE_CHANGE";
 
-    private void sendEvent(String eventName, @Nullable WritableMap args) {
-        reactContext
-                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit(eventName, args);
+    public static void pipModeChanged(Boolean isInPictureInPictureMode) {
+        eventEmitter.emit(PIP_MODE_CHANGE, isInPictureInPictureMode);
     }
 
     public RNAndroidPipModule(ReactApplicationContext reactContext) {
@@ -149,7 +147,6 @@ public class RNAndroidPipModule extends ReactContextBaseJavaModule implements Li
 
     @Override
     public void onHostPause() {
-        Log.d(this.getName(), "Activity pip: onHostPause");
         if (isPipSupported && isPipListenerEnabled) {
             enterPictureInPictureMode();
         }
@@ -158,22 +155,5 @@ public class RNAndroidPipModule extends ReactContextBaseJavaModule implements Li
     @Override
     public void onHostDestroy() {
         Log.d(this.getName(), "Activity pip: onHostDestroy");
-    }
-
-    @Override
-    public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            AppCompatActivity activity = (AppCompatActivity) source;
-            boolean isInPiPMode = activity.isInPictureInPictureMode();
-            // Check for changes on pip mode.
-            if (this.isInPiPMode != isInPiPMode) {
-                this.isInPiPMode = isInPiPMode;
-                Log.d(this.getName(), "Activity pip mode has changed to " + isInPiPMode);
-                // Dispatch onPictureInPicutreModeChangedEvent to js.
-                WritableMap args = Arguments.createMap();
-                args.putBoolean("isInPiPMode", isInPiPMode);
-                sendEvent("onPictureInPictureModeChanged", args);
-            }
-        }
     }
 }
