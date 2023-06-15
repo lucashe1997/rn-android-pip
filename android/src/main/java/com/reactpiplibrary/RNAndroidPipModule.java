@@ -96,21 +96,6 @@ public class RNAndroidPipModule extends ReactContextBaseJavaModule implements Li
     }
 
     @ReactMethod
-    public void startModeChangeListener() {
-        AppCompatActivity activity = (AppCompatActivity) reactContext.getCurrentActivity();
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    activity.getLifecycle().addObserver(RNAndroidPipModule.this);
-                }
-            });
-        } else {
-            Log.d(this.getName(), "App activity is null.");
-        }
-    }
-
-    @ReactMethod
     public void hasSpecialPipPermission(final Promise promise) {
         AppOpsManager manager = (AppOpsManager) reactContext.getSystemService(Context.APP_OPS_SERVICE);
         if (manager != null) {
@@ -142,7 +127,6 @@ public class RNAndroidPipModule extends ReactContextBaseJavaModule implements Li
 
     @Override
     public void onHostResume() {
-        Log.d(this.getName(), "Activity pip: onHostResume");
     }
 
     @Override
@@ -154,6 +138,5 @@ public class RNAndroidPipModule extends ReactContextBaseJavaModule implements Li
 
     @Override
     public void onHostDestroy() {
-        Log.d(this.getName(), "Activity pip: onHostDestroy");
     }
 }
